@@ -1,56 +1,13 @@
-import * as React from 'react'
-import { Link } from 'gatsby'
-import styled from 'styled-components'
+import React from 'react';
+import styled from '@emotion/styled';
+import { Link } from 'gatsby';
 
-import theme from 'utils/theme'
+import theme from '~/src/utils/theme';
+import { useScrollState } from '~/src/hooks/use-scroll-state';
 
 interface HeaderProps {
-    title: string
-    fixed?: boolean
-}
-
-interface HeaderState {
-    hide: boolean,
-    pageYOffset: number
-}
-
-export default class Header extends React.PureComponent<HeaderProps, HeaderState> {
-    static defaultProps: Partial<HeaderProps> = {
-        fixed: false,
-    }
-
-    state = {
-        hide: false,
-        pageYOffset: 0,
-    }
-
-    handleScroll = () => {
-        const { pageYOffset } = window
-        const deltaY = pageYOffset - this.state.pageYOffset
-        const hide = pageYOffset !== 0 && deltaY >= 0
-
-        this.setState({ hide, pageYOffset })
-    }
-
-    componentDidMount() {
-        if (!this.props.fixed) {
-            window.addEventListener('scroll', this.handleScroll)
-        }
-    }
-
-    componentWillUnmount() {
-        if (!this.props.fixed) {
-            window.removeEventListener('scroll', this.handleScroll)
-        }
-    }
-
-    render() {
-        return (
-            <Container className={this.state.hide ? 'hide' : ''}>
-                <HomeLink to='/'>{this.props.title}</HomeLink>
-            </Container>
-        )
-    }
+  title: string
+  fixed?: boolean
 }
 
 const Container = styled.header`
@@ -68,13 +25,24 @@ const Container = styled.header`
     &.hide {
         transform: translateY(-${theme.headerHeight});
     }
-`
+`;
 
-const HomeLink = styled(Link) `
+const HomeLink = styled(Link)`
     position: absolute;
     left: 1.25rem;
     text-decoration: none;
     font-size: 1.5rem;
     font-weight: bold;
     color: ${theme.blackColor};
-`
+`;
+
+const Header: React.FC<HeaderProps> = ({ title, fixed }) => {
+  const scroll = useScrollState();
+  return (
+    <Container className={!fixed && scroll.accDeltaY > 15 ? 'hide' : ''}>
+      <HomeLink to='/'>{title}</HomeLink>
+    </Container>
+  );
+};
+
+export default Header;

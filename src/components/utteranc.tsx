@@ -1,27 +1,56 @@
-import * as React from 'react'
+import React from 'react';
+import styled from '@emotion/styled';
+
+// @ts-ignore
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import utterancClient from '!!file-loader?modules!~/vendor/utteranc-client';
 
 interface UtterancProps {
-    repo: string
-    branch: string
-    issueTerm: string
+  repo: string
+  branch: string
+  issueTerm: string
 }
 
-export default class Utteranc extends React.PureComponent<UtterancProps> {
-    instance: HTMLDivElement = null;
+const Container = styled.div`
+  .utterances {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .utterances-frame {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: 1px;
+    min-width: 100%;
+    max-width: 100%;
+    height: 100%;
+    border: 0;
+  }
+`;
 
-    componentDidMount() {
-        const utteranc = document.createElement('script')
-        utteranc.src = 'https://utteranc.es/client.js'
-        utteranc.async = true
+const Utteranc: React.FC<UtterancProps> = ({ repo, branch, issueTerm }) => {
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
 
-        utteranc.setAttribute('repo', this.props.repo)
-        utteranc.setAttribute('branch', this.props.branch)
-        utteranc.setAttribute('issue-term', this.props.issueTerm)
+  React.useEffect(() => {
+    const utteranc = document.createElement('script');
+    utteranc.id = 'utteranc-client';
+    utteranc.src = utterancClient;
+    utteranc.async = true;
 
-        this.instance.appendChild(utteranc)
-    }
+    utteranc.setAttribute('repo', repo);
+    utteranc.setAttribute('branch', branch);
+    utteranc.setAttribute('issue-term', issueTerm);
 
-    render() {
-        return <div ref={el => (this.instance = el)} />
-    }
-}
+    containerRef.current!.appendChild(utteranc);
+  }, [repo, branch, issueTerm]);
+
+  return (
+    <Container ref={containerRef}/>
+  );
+};
+
+export default Utteranc;

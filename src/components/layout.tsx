@@ -1,13 +1,14 @@
-import * as React from 'react'
-import { StaticQuery, graphql } from 'gatsby'
-import { createGlobalStyle } from 'styled-components'
+import React from 'react';
+import { Global, css } from '@emotion/core';
 
-import { SiteHelmet } from 'components'
-import theme from 'utils/theme'
+import theme from '~/src/utils/theme';
+import { useSiteMetadata } from '~/src/hooks/use-site-metadata';
+import { ScrollStateProvider } from '~/src/hooks/use-scroll-state';
+import { SiteHelmet } from '~/src/components';
+import '~/src/assets/hack-subset.css';
 
-import 'assets/hack-subset.css'
-
-const GlobalStyle = createGlobalStyle`
+const GlobalStyle: React.FC = () => (
+  <Global styles={css`
     @import url(//fonts.googleapis.com/earlyaccess/notosanskr.css);
 
     body {
@@ -34,37 +35,21 @@ const GlobalStyle = createGlobalStyle`
     html, body {
         margin: 0;
     }
-`
+  `}/>
+);
 
-interface LayoutProps {
-    children: any
-}
+const Layout: React.FC = ({ children }) => {
+  const siteMetadata = useSiteMetadata();
+  return (
+        <>
+            {/* 사이트 기본 메타 정보는 대부분의 페이지에서 Override 되며, 생략된 경우만 사용 */}
+            <SiteHelmet {...siteMetadata}/>
+            <GlobalStyle/>
+            <ScrollStateProvider>
+              {children}
+            </ScrollStateProvider>
+        </>
+  );
+};
 
-export default ({ children }: LayoutProps) => (
-    <StaticQuery
-        query={graphql`
-            query LayoutQuery {
-                site {
-                    siteMetadata {
-                        siteUrl
-                        title
-                        description
-                        author: owner {
-                            name
-                            email
-                        }
-                        keywords
-                    }
-                }
-            }
-        `}
-        render={({ site: { siteMetadata } }) => (
-            <>
-                {/* 사이트 기본 메타 정보는 대부분의 페이지에서 Override 되며, 생략된 경우만 사용 */}
-                <SiteHelmet {...siteMetadata}/>
-                <GlobalStyle/>
-                {children}
-            </>
-        )}
-    />
-)
+export default Layout;
